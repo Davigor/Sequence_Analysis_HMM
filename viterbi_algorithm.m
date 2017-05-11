@@ -12,7 +12,7 @@ e = [1.8234  5.7812];                          % emission probabilities, where i
 vprob = [1; 0];                                % assumes start state is 1 (p = 1)
 
 
-% viterbi algorithm in log space (to avoid underflow)
+% viterbi algorithm in log space (to avoid underflow). Emission probabilities are sampled from Poisson distribution
 for i = 2:(n + 1)
     for j = 1: 2
         vprob(j, i) = log( poisspdf(seq(i - 1), e(j)) ) + max( vprob(:, i - 1) + a(:, j) );
