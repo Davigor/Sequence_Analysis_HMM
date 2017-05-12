@@ -4,7 +4,7 @@ states = dlmread('sample_states.txt', '_');
 
 n = length(seq);
 a = log([0.9551  0.0449; 0.0880  0.9120]);     % state transition matrix
-e = [1.8234  5.7812];                          % emission probabilities, where index = state
+e = [1.8234  5.7812];                          % emission lambda for sampling from Poisson distribution
 vprob = [1; 0];                                % assumes start state is 1 (p = 1)
 
 % viterbi algorithm in log space (to avoid underflow). Emission probabilities are sampled from Poisson distribution
