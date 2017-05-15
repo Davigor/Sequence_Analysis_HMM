@@ -1,7 +1,7 @@
 /**
  * Simple implementation of the viterbi algorithm for estimating the states of a Hidden Markov Model given a sequence text file.
  * Program assumes there are 2 states, state 1 and state 2. State transition matrix probabilites and emission lambda for sampling
- * from Poisson distribution can be altered by user.
+ * from Poisson distribution can be changed within code.
  * 
  * Optional argument to read in file of known states for comparison with algorithm's output. 
  * Sequence file is assumed to be one entry per line, and state file is assumed to give corresponding state on same line separated
