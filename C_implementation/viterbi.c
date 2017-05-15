@@ -143,7 +143,6 @@ double max (double a, double b)
     {
         return a;
     }
-    
     else if (a < b)
     {
     return b;
@@ -162,7 +161,6 @@ int argmax (double row0, double row1)
     {
         return 1;
     }
-    
     return row1;
 }
 
@@ -173,7 +171,6 @@ double poisson (double k, double lambda)
     {
         factk = 1;
     }
-    
     else
     {
         factk = k;
