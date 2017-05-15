@@ -1,7 +1,7 @@
 /**
  * Simple implementation of the viterbi algorithm for estimating the states of a Hidden Markov Model given a sequence text file.
  * Program assumes there are 2 states, state 1 and state 2. State transition matrix probabilites and emission lambda for sampling
- * from Poisson distribution can be changed within code.
+ * from Poisson distribution can be altered by user.
  * 
  * Optional argument to read in file of known states for comparison with algorithm's output. 
  * Sequence file is assumed to be one entry per line, and state file is assumed to give corresponding state on same line separated
@@ -118,6 +118,7 @@ int main (int argc, char *argv[])
             pi[j][i] = max( row0 , row1 );
         }
     }
+    free(seq);
     
     // traceback to find most likely path
     path[n] = argmax( pi[0][n], pi[1][n] );
@@ -126,6 +127,17 @@ int main (int argc, char *argv[])
         path[i] = ptr[path[i + 1]][i + 1];
     }
     
+    for (int i = 0; i < 2; i++)
+    {
+        free(vprob[i]);
+        free(ptr[i]);
+        free(pi[i]);
+    }
+    
+    free(vprob);
+    free(ptr);
+    free(pi);
+
     // incremment each entry of the path to correspond to states 1 and 2 intead of 0 and 1, and print
     for (int i = 0; i < n; i++)
     {
@@ -133,6 +145,7 @@ int main (int argc, char *argv[])
         printf("%i", path[i]);
     }
     printf("\n");
+    free(path);
     return 0;
 }
 
@@ -143,6 +156,7 @@ double max (double a, double b)
     {
         return a;
     }
+    
     else if (a < b)
     {
     return b;
@@ -161,6 +175,7 @@ int argmax (double row0, double row1)
     {
         return 1;
     }
+    
     return row1;
 }
 
@@ -171,6 +186,7 @@ double poisson (double k, double lambda)
     {
         factk = 1;
     }
+    
     else
     {
         factk = k;
@@ -181,3 +197,6 @@ double poisson (double k, double lambda)
     }
     return ( (pow(lambda, k) * exp(-lambda)) / factk );
 }
+
+
+
