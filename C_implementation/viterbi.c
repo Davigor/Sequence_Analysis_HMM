@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <ctype.h>
 
 double max (double a, double b);
 double poisson (double k, double lambda);
@@ -29,6 +30,13 @@ int main (int argc, char *argv[])
     if (argc != 3 && argc != 4)
     {
         printf("Usage: ./viterbi n my_sequence_file.txt my_state_file.txt .  Include at least n and sequence file.\n");
+        return 1;
+    }
+    
+    // check for n value
+    if (!isdigit(*argv[1]))
+    {
+        printf("Please enter valid n value.\n");
         return 1;
     }
     
@@ -57,7 +65,7 @@ int main (int argc, char *argv[])
     if(argv[3])
     {
         FILE *statef = fopen(argv[3], "r");
-        
+  
         if (statef == NULL)
         {
             printf("Invalid state file.\n");
