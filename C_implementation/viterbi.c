@@ -44,7 +44,7 @@ int main (int argc, char *argv[])
         return 1;
     }
     
-    int *seq = malloc(n * sizeof(int));
+    int *seq = calloc(n * sizeof(int));
     
     for (int i = 0; i < n; i++)
     {
