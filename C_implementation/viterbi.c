@@ -64,7 +64,7 @@ int main (int argc, char *argv[])
             return 1;
         }
         
-        int *state = malloc(n * sizeof(int));
+        int *state = calloc(n, sizeof(int));
         
         for (int i = 0; i < n; i++)
         {
@@ -73,6 +73,7 @@ int main (int argc, char *argv[])
             printf("%i", state[i]);
         }
         fclose(statef);
+        free(state);
         printf("\n");
     }
 
@@ -86,24 +87,23 @@ int main (int argc, char *argv[])
     double e[2] = {1.8234, 5.7812};
     
     // allocate memory
-    int *path = malloc(n * sizeof(double));
-    double **vprob = malloc(n * sizeof *vprob);
-    double **ptr = malloc(n * sizeof *ptr);
-    double **pi = malloc(n * sizeof *pi);
+    int *path = calloc(n, sizeof(double));
+    double **vprob = calloc(n, sizeof *vprob);
+    double **ptr = calloc(n, sizeof *ptr);
+    double **pi = calloc(n, sizeof *pi);
     
     for (int i = 0; i < 2; i++)
     {
-        vprob[i] = malloc(sizeof *vprob[i] * n);
-        ptr[i] = malloc(sizeof *ptr[i] * n);
-        pi[i] = malloc(sizeof *pi[i] * n);
+        vprob[i] = calloc(n, sizeof *vprob[i]);
+        ptr[i] = calloc(n, sizeof *ptr[i]);
+        pi[i] = calloc(n, sizeof *pi[i]);
     }
-    
-    double row0;
-    double row1;
-    
+
     // initialize vprob array; assumed starting state is state 1
     vprob[0][0] = 1;
     vprob[1][0] = 0;
+    double row0;
+    double row1;
     
     // viterbi algorithm in log space to avoid underflow. Emission probabilities sampled from poisson distribution
     for (int i = 1; i < n; i++)
@@ -121,19 +121,19 @@ int main (int argc, char *argv[])
     free(seq);
     
     // traceback to find most likely path
-    path[n] = argmax( pi[0][n], pi[1][n] );
-    for (int i = n - 1; i > 0; i--)
+    path[n - 1] = argmax( pi[0][n - 1], pi[1][n - 1] );
+    for (int i = n - 2; i > 0; i--)
     {
         path[i] = ptr[path[i + 1]][i + 1];
     }
-    
+
+    // free remaining memory
     for (int i = 0; i < 2; i++)
     {
         free(vprob[i]);
         free(ptr[i]);
         free(pi[i]);
     }
-    
     free(vprob);
     free(ptr);
     free(pi);
@@ -149,14 +149,12 @@ int main (int argc, char *argv[])
     return 0;
 }
 
-
 double max (double a, double b)
 {
     if (a > b)
     {
         return a;
     }
-    
     else if (a < b)
     {
     return b;
@@ -175,7 +173,6 @@ int argmax (double row0, double row1)
     {
         return 1;
     }
-    
     return row1;
 }
 
@@ -186,7 +183,6 @@ double poisson (double k, double lambda)
     {
         factk = 1;
     }
-    
     else
     {
         factk = k;
