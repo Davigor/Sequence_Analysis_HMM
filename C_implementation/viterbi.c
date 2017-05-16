@@ -193,6 +193,3 @@ double poisson (double k, double lambda)
     }
     return ( (pow(lambda, k) * exp(-lambda)) / factk );
 }
-
-
-
