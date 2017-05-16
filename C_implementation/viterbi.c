@@ -5,7 +5,7 @@
  * 
  * Optional argument to read in file of known states for comparison with algorithm's output. 
  * Sequence file is assumed to be one entry per line, and state file is assumed to give corresponding state on same line separated
- * whitespace (see .txt files for example).
+ * by whitespace (see .txt files for example).
  * 
  * Usage: ./viterbi n my_sequence_file.txt my_state_file.txt
  * n = number of entries in sequence file (required)
