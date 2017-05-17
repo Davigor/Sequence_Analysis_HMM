@@ -3,7 +3,7 @@
  * Program automatically determines n value from sequence file and assumes that state file has same n value.
  * 
  * Program follows example from Durbin et. al.'s "The occasionally dishonest casino, part 1." on p. 54 of Biological Sequence
- * Analyis, with solution and viterbi output given on p. 57. The two states, F and L, correspond to a "Fair" or a "Loaded" die.
+ * Analyis (2002), with solution and viterbi output given on p. 57. The two states, F and L, correspond to a "Fair" or a "Loaded" die.
  * 
  * free .pdf of Durbin at: http://dnapunctuation.org/~poptsova/course/Durbin-Et-Al-Biological-Sequence-Analysis-CUP-2002-No-OCR.pdf
  * 
