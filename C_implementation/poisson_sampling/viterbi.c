@@ -1,14 +1,15 @@
 /**
  * Simple implementation of the viterbi algorithm for estimating the states of a Hidden Markov Model given a sequence text file.
  * Program assumes there are 2 states, state 1 and state 2. State transition matrix probabilites and emission lambda for sampling
- * from Poisson distribution can be altered by user.
+ * from Poisson distribution are hardcoded in program. 
+ * 
+ * Program automatically determines n value from sequence file and assumes that state file has same n value.
  * 
  * Optional argument to read in file of known states for comparison with algorithm's output. 
  * Sequence file is assumed to be one entry per line, and state file is assumed to give corresponding state on same line separated
  * by whitespace (see .txt files for example).
  * 
- * Usage: ./viterbi n my_sequence_file.txt my_state_file.txt
- * n = number of entries in sequence file (required)
+ * Usage: ./viterbi my_sequence_file.txt my_state_file.txt
  * my_sequence_file.txt = sequence file (required)
  * my_state_file.txt = state file (optional)
  *
@@ -27,62 +28,72 @@ int argmax (double row0, double row1);
 int main (int argc, char *argv[]) 
 {
     // check for correct number of command line args
-    if (argc != 3 && argc != 4)
+    if (argc != 2 && argc != 3)
     {
-        printf("Usage: ./viterbi n my_sequence_file.txt my_state_file.txt .  Include at least n and sequence file.\n");
+        printf("Usage: ./viterbi my_sequence_file.txt my_state_file.txt .  Include at least sequence file.\n");
         return 1;
     }
     
-    // check for n value
-    if (!isdigit(*argv[1]))
-    {
-        printf("Please enter valid n value.\n");
-        return 1;
-    }
-    
-    int n = atoi(argv[1]);
-    int num;
-    
-    // open sequence file and store in array
-    FILE *seqf = fopen(argv[2], "r");
-    
-    if (seqf == NULL)
+    // open sequence file and store in array. Dynamically allocate memory and automatically detect sequence n value
+    FILE *seqf = fopen(argv[1], "r");
+    if (!seqf)
     {
         printf("Invalid sequence file.\n");
         return 1;
     }
     
-    int *seq = calloc(n, sizeof(int));
+    int num;
+    int memsize = 100;
+    int n = 0;
+    int *seq = calloc(memsize, sizeof(int));
     
-    for (int i = 0; i < n; i++)
+    while(fscanf(seqf, "%i", &num) == 1)
     {
-        fscanf(seqf, "%i", &num);    
-        seq[i] = num;
+        seq[n] = num;
+        n++;
+
+        if (n == memsize)
+        {
+            memsize += 100;
+            seq = realloc(seq, memsize * sizeof(int));
+        }
+        
+        if(!seq)
+        {
+            printf("Not enough memory.");
+            return 1;
+        }
     }
     fclose(seqf);
     
-    // if passed as an argument, open the state solution file and store as an array
-    if(argv[3])
+    // if passed as an argument, open the state solution file and print. Assumes n is same as sequence n above
+    if(argv[2])
     {
-        FILE *statef = fopen(argv[3], "r");
-  
-        if (statef == NULL)
+        FILE *statef = fopen(argv[2], "r");
+        
+        if (!statef)
         {
             printf("Invalid state file.\n");
             return 1;
         }
         
         int *state = calloc(n, sizeof(int));
+        if(!state)
+        {
+            printf("Not enough memory.");
+            return 1;
+        }
         
+        printf("State solution:\n");
         for (int i = 0; i < n; i++)
         {
-            fscanf(statef, "%*i %i", &num);
+            fscanf(statef, "%*i" "%i", &num);
             state[i] = num;
             printf("%i", state[i]);
         }
         fclose(statef);
         free(state);
-        printf("\n");
+        printf("\n\n");
     }
 
     // state transition matrix in log space
@@ -134,6 +145,14 @@ int main (int argc, char *argv[])
     {
         path[i] = ptr[path[i + 1]][i + 1];
     }
+    
+    // print most likely path, incrementing by 1 for states 1 and 2
+    for (int i = 0; i < n; i++)
+    {
+        path[i]++;
+        printf("%i", path[i]);
+    }
+    printf("\n");
 
     // free remaining memory
     for (int i = 0; i < 2; i++)
@@ -145,15 +164,8 @@ int main (int argc, char *argv[])
     free(vprob);
     free(ptr);
     free(pi);
-
-    // incremment each entry of the path to correspond to states 1 and 2 intead of 0 and 1, and print
-    for (int i = 0; i < n; i++)
-    {
-        path[i]++;
-        printf("%i", path[i]);
-    }
-    printf("\n");
     free(path);
+    
     return 0;
 }
 
