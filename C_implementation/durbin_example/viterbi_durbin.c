@@ -230,5 +230,5 @@ int argmax (double row0, double row1)
     {
         return 1;
     }
-    return row1;
+    return 1;
 }
