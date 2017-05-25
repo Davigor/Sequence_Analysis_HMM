@@ -25,6 +25,7 @@ int sequence_length = 0;
 int* sequence;
 int* states;
 
+
 static double max (double a, double b)
 {
     if (a > b)
@@ -50,13 +51,13 @@ static int argmax (double row0, double row1)
     }
 }
 
+
 static int* read_sequencefile(const char* sequence_file, int* out_n)
 {
     FILE *seqf = fopen(sequence_file, "r");
     if (!seqf)
     {
-        fprintf(stderr, "Invalid sequence file.\n");
-        return NULL;
+        err(EX_NOINPUT, "%s", sequence_file);
     }
     
     int num;
@@ -71,32 +72,34 @@ static int* read_sequencefile(const char* sequence_file, int* out_n)
         
         if(!sequence)
         {
-            fprintf(stderr, "Not enough memory.");
-            return NULL;
+            goto SEQ_CLEANUP;
         }
     }
     fclose(seqf);
-    
     *out_n = n;
     return sequence;
+    
+    
+    SEQ_CLEANUP:
+        fclose(seqf);
+        free(sequence);
+        errx(EX_OSERR, "Not enough memory.");
 }
 
 
-static int read_statefile(const char* state_file)
+static void read_statefile(const char* state_file)
 {
     FILE *statef = fopen(state_file, "r");
     
     if (!statef)
     {
-        fprintf(stderr, "Invalid state file.\n");
-        return EXIT_FAILURE;
+        err(EX_NOINPUT, "%s", state_file);
     }
     
     char *state = malloc(sequence_length * sizeof(char));
     if(!state)
     {
-        fprintf(stderr, "Not enough memory.");
-        return EXIT_FAILURE;
+        goto STATE_CLEANUP;
     }
     
     char ch;
@@ -115,11 +118,17 @@ static int read_statefile(const char* state_file)
     fclose(statef);
     free(state);
     printf("\n\n");
-    return 0;
+    return;
+    
+    
+    STATE_CLEANUP:
+        fclose(statef);
+        free(state);
+        errx(EX_OSERR, "Not enough memory.");
 }
 
 
-static int run_viterbi(int* seq, int seq_length)
+static void run_viterbi(int* seq, int seq_length)
 {
     // state transition matrix in log space
     double a[2][2] = {
@@ -145,8 +154,7 @@ static int run_viterbi(int* seq, int seq_length)
     
     if( !path || !vprob || !ptr || !pi )
         {
-            fprintf(stderr, "Not enough memory.");
-            return 1;
+            goto VITERBI_CLEANUP_1;
         }
     
     for (int i = 0; i < 2; i++)
@@ -157,8 +165,7 @@ static int run_viterbi(int* seq, int seq_length)
         
         if( !vprob[i] || !ptr[i] || !pi[i] )
         {
-            fprintf(stderr, "Not enough memory.");
-            return 1;
+            goto VITERBI_CLEANUP_2;
         }
     }
 
@@ -221,16 +228,35 @@ static int run_viterbi(int* seq, int seq_length)
     }
     printf("\n");
     free(path);
-    return 0;
+    return;
+    
+    
+    VITERBI_CLEANUP_1:
+        free(vprob);
+        free(ptr);
+        free(pi);
+        errx(EX_OSERR, "Not enough memory.");
+        
+    VITERBI_CLEANUP_2:
+        for (int i = 0; i < 2; i++)
+        {
+            free(vprob[i]);
+            free(ptr[i]);
+            free(pi[i]);
+        }
+        free(vprob);
+        free(ptr);
+        free(pi);
+        errx(EX_OSERR, "Not enough memory.");
 }
+
 
 int main (int argc, char *argv[]) 
 {
     // check for correct number of command line args
     if (argc != 2 && argc != 3)
     {
-        fprintf(stderr, "Usage: ./viterbi my_sequence_file.txt [my_state_file.txt]. Include at least sequence file.\n");
-        return 1;
+        errx(EX_USAGE, "Usage: ./viterbi my_sequence_file.txt [my_state_file.txt]. Include at least sequence file.");
     }
     
     read_sequencefile(argv[1], &sequence_length);
